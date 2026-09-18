@@ -4,13 +4,13 @@ services:
 
   app_proxy:
     environment:
-      APP_HOST: h-steam_app_1
+      APP_HOST: l-steam_app_1
       APP_PORT: 8083
       PROXY_AUTH_ADD: "false"
 
   app:
     image: josh5/steam-headless:latest
-    container_name: h-steam_app_1
+    container_name: l-steam_app_1
     restart: unless-stopped
     privileged: true
     shm_size: "2G"
