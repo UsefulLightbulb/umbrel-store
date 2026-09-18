@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+
+  app_proxy:
+    environment:
+      APP_HOST: h-steam_app_1
+      APP_PORT: 8083
+      PROXY_AUTH_ADD: "false"
+
+  app:
+    image: josh5/steam-headless:latest
+    container_name: h-steam_app_1
+    restart: unless-stopped
+    privileged: true
+    shm_size: "2G"
+    ipc: host
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 524288
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_NICE
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      - TZ=Europe/Berlin
+      - USER_LOCALES=en_US.UTF-8 UTF-8
+      - DISPLAY=:55
+      - PUID=1000
+      - PGID=1000
+      - UMASK=000
+      - USER_PASSWORD=password
+      
+      - MODE=primary
+      
+      - WEB_UI_MODE=vnc
+      - ENABLE_VNC_AUDIO=true
+      - PORT_NOVNC_WEB=8083
+      
+      - ENABLE_STEAM=true
+      - STEAM_ARGS=-silent
+      
+      - ENABLE_SUNSHINE=true
+      - SUNSHINE_USER=admin
+      - SUNSHINE_PASS=admin
+      
+      - ENABLE_EVDEV_INPUTS=false
+      - FORCE_X11_DUMMY_CONFIG=true
+    ports:
+      # Sunshine web interface
+      - "47990:47990/tcp"
+    
+      # Sunshine streaming
+      - "47984:47984/tcp"
+      - "47989:47989/tcp"
+      - "48010:48010/tcp"
+      - "47998:47998/udp"
+      - "47999:47999/udp"
+      - "48000:48000/udp"
+      - "48010:48010/udp"
+    
+      # Steam Remote Play
+      - "27031-27036:27031-27036/udp"
+      - "27036-27037:27036-27037/tcp"
+    devices:
+      - /dev/fuse
+      - /dev/uinput
+      - /dev/dri/card0
+      - /dev/dri/renderD128
+    device_cgroup_rules:
+      - "c 13:* rmw"
+    volumes:
+      - ${APP_DATA_DIR}/data/home:/home/default/:rw
+      - ${APP_DATA_DIR}/data/games:/mnt/games/:rw
